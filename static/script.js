@@ -153,7 +153,7 @@ function addLog(line) {
 }
 
 function updateProgressFromLine(line) {
-    const match = line.match(/\[download\]\s+(\d+(?:\.\d+)?)%/)
+    const match = line.match(/\[download\]\s+(\d+(?:\.\d+)?)% playlist/)
     if (match) {
         progressBar.style.width = `${Math.min(100, Number(match[1]))}%`
     }
