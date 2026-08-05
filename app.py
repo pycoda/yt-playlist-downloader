@@ -78,19 +78,30 @@ class QueueLogger:
         self.q.put(f"ERROR: {msg}")
 
 
-def make_progress_hook(q, state):
+def make_progress_hook(q, state, total_tracks):
     def hook(d):
         status = d.get("status")
+
         if status == "downloading":
             total = d.get("total_bytes") or d.get("total_bytes_estimate")
             downloaded = d.get("downloaded_bytes", 0)
+
             if total:
-                pct = downloaded / total * 100
-                if pct - state.get("last_pct", -5) >= 1 or pct >= 99.9:
-                    state["last_pct"] = pct
-                    q.put(f"[download] {pct:5.1f}% of {sizeof_fmt(total)}")
+                current_pct = downloaded / total * 100
+
+                overall_pct = (
+                    (state.get("completed_tracks", 0) + current_pct / 100)
+                    / total_tracks
+                ) * 100
+
+                if overall_pct - state.get("last_pct", -5) >= 1 or overall_pct >= 99.9:
+                    state["last_pct"] = overall_pct
+                    q.put(f"[download] {overall_pct:5.1f}% playlist")
+
         elif status == "finished":
+            state["completed_tracks"] += 1
             state["last_pct"] = -5
+
             name = os.path.basename(d.get("filename", ""))
             q.put(f"[download] finished: {name}")
 
@@ -187,7 +198,10 @@ def run_job(job_id, playlist_url, playlist_items, fmt, quality):
     q = job["queue"]
     tmp_dir = tempfile.mkdtemp(prefix="ytpl_")
     job["tmp_dir"] = tmp_dir
-    state = {"last_pct": -5}
+    state = {
+    "last_pct": -5,
+    "completed_tracks": 0,
+}
 
     common_opts = {
         "retries": 5,
@@ -205,7 +219,7 @@ def run_job(job_id, playlist_url, playlist_items, fmt, quality):
         "ignoreerrors": True,
         "outtmpl": os.path.join(tmp_dir, "%(title)s.%(ext)s"),
         "logger": QueueLogger(q),
-        "progress_hooks": [make_progress_hook(q, state)],
+        "progress_hooks": [make_progress_hook(q, state, len(playlist_items))],
         "js_runtimes": {"deno": {}},
         "postprocessors": [{"key": "FFmpegMetadata"}],
     }
@@ -236,6 +250,7 @@ def run_job(job_id, playlist_url, playlist_items, fmt, quality):
     try:
         with YoutubeDL(ydl_opts) as ydl:
             ydl.download([playlist_url])
+            state["completed_tracks"] = len(playlist_items)
     except Exception as e:
         q.put(f"ERROR: {e}")
 
