@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>playlist downloader</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <main class="app-shell">
+        <header class="hero">
+            <div>
+                <h1>playlist downloader</h1>
+                <p class="subtitle">select tracks, choose an output format, then download one ZIP</p>
+            </div>
+        </header>
+
+        <section class="panel fetch-panel">
+            <div class="input-row">
+                <label class="field grow">
+                    <span>playlist URL</span>
+                    <input id="playlistUrl" type="url" placeholder="https://www.youtube.com/playlist?list=..." autocomplete="off">
+                </label>
+
+                <button id="fetchButton" class="primary" type="button">
+                    fetch playlist
+                </button>
+            </div>
+
+            <p id="fetchStatus" class="hint">paste a YouTube playlist URL to begin</p>
+        </section>
+
+        <section id="playlistPanel" class="panel playlist-panel hidden">
+            <div class="section-head">
+                <div>
+                    <p class="eyebrow">playlist</p>
+                    <h2 id="playlistTitle">playlist</h2>
+                    <p id="selectionCount" class="hint">0 selected</p>
+                </div>
+
+                <div class="selection-actions">
+                    <button id="selectAllButton" class="secondary" type="button">select all</button>
+                    <button id="selectNoneButton" class="secondary" type="button">select none</button>
+                </div>
+            </div>
+
+            <div id="trackList" class="track-list"></div>
+        </section>
+
+        <section id="optionsPanel" class="panel options-panel hidden">
+            <div class="section-head">
+                <div>
+                    <p class="eyebrow">output</p>
+                    <h2>download settings</h2>
+                </div>
+            </div>
+
+            <div class="settings-grid">
+                <div class="mode-picker" role="radiogroup" aria-label="output type">
+                    <label class="mode-card active">
+                        <input type="radio" name="format" value="mp3" checked>
+                        <span class="mode-title">MP3</span>
+                        <span class="mode-description">audio only</span>
+                    </label>
+
+                    <label class="mode-card">
+                        <input type="radio" name="format" value="mp4">
+                        <span class="mode-title">MP4</span>
+                        <span class="mode-description">video + audio</span>
+                    </label>
+                </div>
+
+                <label class="field quality-field">
+                    <span id="qualityLabel">MP3 bitrate</span>
+                    <select id="qualitySelect">
+                        <option value="128">128 kbps</option>
+                        <option value="192" selected>192 kbps</option>
+                        <option value="256">256 kbps</option>
+                        <option value="320">320 kbps</option>
+                    </select>
+                </label>
+
+                <button id="downloadButton" class="primary download-button" type="button">
+                    download selected
+                </button>
+            </div>
+        </section>
+
+        <section id="jobPanel" class="panel job-panel hidden">
+            <div class="section-head">
+                <div>
+                    <p class="eyebrow">job output</p>
+                    <h2 id="jobTitle">waiting</h2>
+                </div>
+                <span id="jobBadge" class="badge">idle</span>
+            </div>
+
+            <div class="progress-track" aria-label="download progress">
+                <div id="progressBar" class="progress-fill"></div>
+            </div>
+
+            <div id="logBox" class="log-box" aria-live="polite"></div>
+
+            <a id="zipButton" class="primary zip-button hidden" href="#">
+                download ZIP
+            </a>
+        </section>
+
+        <footer>
+            runs locally on this PC · requires <code>ffmpeg</code> and <code>yt-dlp</code>
+        </footer>
+    </main>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
