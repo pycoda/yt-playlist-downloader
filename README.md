@@ -27,7 +27,6 @@ sudo apt install ffmpeg
 Create and activate a virtual environment:
 
 ```bash
-cd yt-playlist-downloader
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
