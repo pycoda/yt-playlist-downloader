@@ -18,10 +18,11 @@ A local Flask frontend for downloading selected videos from a YouTube playlist w
 
 ## Linux setup
 
-Install FFmpeg:
+Install FFmpeg and yt-dlp:
 
 ```bash
 sudo apt install ffmpeg
+pip install yt-dlp
 ```
 
 Create and activate a virtual environment:
